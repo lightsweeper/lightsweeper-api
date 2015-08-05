@@ -262,8 +262,10 @@ class LSFloorConfig:
 
     def selectConfig(self):
         """
-            This function looks in the current directory for .floor files and prompts the user to
-            select one, then loads it into self. 
+            This function looks in for .floor files in the directory set by the
+            directive FLOORSDIR in the general configuration, or, if unset, in
+            the current directory and prompts the user to select one, then loads
+            it into this instance. 
             
             Raises:
                 IOError                 if no .floor files are found
