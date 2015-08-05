@@ -268,7 +268,13 @@ class LSFloorConfig:
             Raises:
                 IOError                 if no .floor files are found
         """
-        floorFiles = list(filter(lambda ls: ls.endswith(".floor"), os.listdir("./")))
+        conf = readConfiguration()
+        try:
+            floorDir = conf["FLOORSDIR"]
+        except KeyError:
+            floors = "./"
+
+        floorFiles = list(filter(lambda ls: ls.endswith(".floor"), os.listdir(floorDir)))
         
         if len(floorFiles) is 0:
             raise IOError("No floor configuration found. Try running LSFloorConfigure.py")
@@ -278,7 +284,7 @@ class LSFloorConfig:
             print("\nFound multiple configurations: \n")
             fileName = userSelect(floorFiles, "\nWhich floor configuration would you like to use?")
         try:
-            self.loadConfig(fileName)
+            self.loadConfig(os.path.join(floorDir, fileName))
         except CannotParseError as e:
             print("\nCould not parse the configuration at {:s}: {:s}".format(fileName, e))
             self.selectConfig()
