@@ -1,4 +1,4 @@
-lightsweeper
+lightsweeper api
 ============
 
 Lightsweeper - a burning man project
