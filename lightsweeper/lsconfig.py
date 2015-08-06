@@ -10,6 +10,8 @@ from lightsweeper.lstile import LSRealTile
 
 DEFAULTCONFIGURATION = dict()
 
+lsSysPath = os.path.join(os.path.dirname(os.path.abspath(__file__)))
+
 class FileDoesNotExistError(IOError):
     """ Custom exception returned when the config file is non-existant. """
     pass
