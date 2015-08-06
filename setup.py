@@ -16,4 +16,6 @@ setup(name='LightSweeper',
     author_email='codewizards@lightsweeper.org',
     url='http://www.lightsweeper.org',
     packages=['lightsweeper'],
+    package_data={"lightsweeper" : ["sounds/*.wav"]},
+    include_package_data=True
     )
