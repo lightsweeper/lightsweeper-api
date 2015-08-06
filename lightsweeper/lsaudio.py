@@ -3,6 +3,7 @@
 import atexit
 import os
 import random
+import sys
 
 from lightsweeper.lsconfig import userSelect
 
@@ -36,7 +37,22 @@ class _lsAudio:
         pass
 
     def playSound(self, filename):
-        pass
+        relativeSounds = os.path.abspath(sys.path[0])
+        gameSounds = os.path.join(relativeSounds, "sounds") # Hacky hack, should use lsconfig
+        systemSounds = os.path.join(os.path.dirname(os.path.abspath(__file__)), "sounds")
+        if (filename == os.path.abspath(filename)):     # filename is absolute
+            pass
+        else:
+            if os.path.isfile(os.path.join(systemSounds, filename)):
+                filename = os.path.join(systemSounds, filename)
+            elif os.path.isfile(os.path.join(gameSounds, filename)):
+                filename = os.path.join(gameSounds, filename)
+            elif os.path.isfile(os.path.join(relativeSounds, filename)):
+                filename = os.path.join(relativeSounds, filename)
+            else:
+                print("WARNING: Cannot find {:s}.".format(filename))
+                return
+        self._playSound
 
     def playLoadedSound(self, name):
         pass
@@ -99,12 +115,15 @@ class _pygameAudio(_lsAudio):
         #        self.shuffleSongs()
         pass
 
-    def loadSong(self, filename, name):
-        pygame.mixer.music.load("sounds/" + filename)
+    def _loadSong(self, filename, name):
+        try:
+            pygame.mixer.music.load("sounds/" + filename)
+        except Exception:
+            pass                # TODO: Handle this properly
         self.loadedSongs.append(filename)
         pass
 
-    def playSong(self, filename, loops=0):
+    def _playSong(self, filename, loops=0):
         pygame.mixer.init(frequency=22050, size=-16, channels=2, buffer=256)
         pygame.mixer.music.load("sounds/" + filename)
         pygame.mixer.music.play(loops)
@@ -118,7 +137,7 @@ class _pygameAudio(_lsAudio):
         pass
 
     #plays loaded songs in a random order
-    def shuffleSongs(self):
+    def _shuffleSongs(self):
         songCount = len(self.loadedSongs)
         song = random.randint(0, songCount - 1)
         print("songs", songCount)
@@ -126,14 +145,14 @@ class _pygameAudio(_lsAudio):
         self.playSong(self.loadedSongs[song], 1)
         pygame.mixer.music.set_endevent(self.SONG_END)
 
-    def loadSound(self, filename, name):
+    def _loadSound(self, filename, name):
         print("loading sound " + filename + " into " + name)
         sound = pygame.mixer.Sound("sounds/" + filename)
         self.soundDictionary[name] = sound
 
-    def playSound(self, filename, custom_relative_volume=-1):
+    def _playSound(self, filename, custom_relative_volume=-1):
         print("playing sound", filename)
-        sound = pygame.mixer.Sound("sounds/" + filename)
+        sound = pygame.mixer.Sound(filename)
         if custom_relative_volume >= 0:
             sound.set_volume(custom_relative_volume * self.soundVolume)
         else:
@@ -147,7 +166,7 @@ class _pygameAudio(_lsAudio):
         #except:
         #    print("Could not load file " + filename)
 
-    def playLoadedSound(self, name):
+    def _playLoadedSound(self, name):
         sound = self.soundDictionary[name]
         pygame.mixer.Sound.play(sound)
 
