@@ -82,6 +82,7 @@ def readConfiguration (configurationFilePath = None):
         print("Loading overrides from {:s}".format(pathList[-1]))
 
     configuration = DEFAULTCONFIGURATION
+    configuration['CONFIGDIR'] = os.path.dirname(pathList[0])
     for path in pathList:
         configuration = parseConfiguration(path, configuration)
 
@@ -272,9 +273,9 @@ class LSFloorConfig:
         """
         conf = readConfiguration()
         try:
-            floorDir = conf["FLOORSDIR"]
+            floorDir = conf["CONFIGDIR"]
         except KeyError:
-            floors = "./"
+            floorDir = os.path.abspath(os.getcwd())
 
         floorFiles = list(filter(lambda ls: ls.endswith(".floor"), os.listdir(floorDir)))
         
@@ -285,10 +286,11 @@ class LSFloorConfig:
         else:
             print("\nFound multiple configurations: \n")
             fileName = userSelect(floorFiles, "\nWhich floor configuration would you like to use?")
+        absFloorConfig = os.path.abspath(os.path.join(floorDir, fileName))
         try:
-            self.loadConfig(os.path.join(floorDir, fileName))
+            self.loadConfig(absFloorConfig)
         except CannotParseError as e:
-            print("\nCould not parse the configuration at {:s}: {:s}".format(fileName, e))
+            print("\nCould not parse the configuration at {:s}: {:s}".format(absFloorConfig, e))
             self.selectConfig()
 
     def _formatFileName(self, fileName):
