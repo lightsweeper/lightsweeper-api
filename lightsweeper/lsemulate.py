@@ -5,14 +5,30 @@ from lightsweeper import Colors
 
 import os
 import random
+import string
 import sys
 import time
 import types
 
-import pygame
-from pygame.locals import *
+try:
+    import pygame
+except ImportError:
+    pass
+
+try:
+    from pygame.locals import *
+except ImportError:
+    pass
 
 wait = time.sleep
+
+
+class BadEmulator(EnvironmentError):
+    """
+        Custom exception returned when a selected emulator cannot be used due
+        to unconfigured or misconfigured environment.
+    """
+    pass
 
 
 class LSEmulateFloor(lsfloor.LSFloor):
@@ -36,15 +52,66 @@ class LSEmulateFloor(lsfloor.LSFloor):
             This method should be a generator that yields tuples of the form
             (row, col, sensor-reading)
         """
+        yield()
+
+class LSASCIIFloor(LSEmulateFloor):
+
+    def init(self):
         pass
 
+    def heartbeat(self):
+        self.clearTerm()
+        print("")
+        print("     ", end="")
+        for c in range(self.cols):
+            print("   {:d}    ".format(c+1), end="")
+        print("")
+        print("    +", end="")
+        for r in range(self.rows):
+            for c in range(self.cols):
+                print("-------+", end="")
+            print("")
+            print("    |", end="")
+            for c in range(self.cols):
+                tile = self.tiles[r][c]
+                print("   {:s}   |".format("_" if tile.segments["a"] else " "), end="")
+            print("")
+            print("    |", end="")
+            for c in range(self.cols):
+                tile = self.tiles[r][c]
+                print("  {:s}{:s}{:s}  |".format("|" if tile.segments["f"] else " ",
+                                                 "_" if tile.segments["g"] else " ",
+                                                 "|" if tile.segments["b"] else " "), end="")
+            print("")
+            print(" {:s}. |".format(string.ascii_letters[r]), end="")
+            for c in range(self.cols):
+                tile = self.tiles[r][c]
+                print("  {:s}{:s}{:s}  |".format("|" if tile.segments["e"] else " ",
+                                                 "_" if tile.segments["d"] else " ",
+                                                 "|" if tile.segments["c"] else " "), end="")
+            print("")
+            print("    |", end="")
+            for c in range(self.cols):
+                print("       |", end="")
+            print("")
+            print("    +", end="")
+        for c in range(self.cols):
+            print("-------+", end="")
+        print("")
+
+
+    def clearTerm(self):
+        os.system('cls' if os.name == 'nt' else 'clear')
 
 # Tweaks LSFloor to update pygame emulator
 class LSPygameFloor(LSEmulateFloor):
 
-    
-    
     def init(self):
+
+        try:
+            import pygame
+        except ImportError:
+            raise BadEmulator("Pygame is not installed so cannot use Pygame emulator.")
 
         pygame.init()
 
@@ -96,7 +163,7 @@ class LSPygameFloor(LSEmulateFloor):
         image = pygame.Surface((100, 100))
         if t is not 0:
             image = self._addText("{:d}%".format(int(t)), image, ("center",25))
-            image = self._addText("{:d}%".format(int(t)), image, ("center",60))
+        #    image = self._addText("{:d}%".format(int(t)), image, ("center",60))
         horizontal = (42,10)
         vertical = (10,30)
         segMap = [(29,10),(71,17),(71,52),(29,79),(19,52),(19,17),(29,45)]

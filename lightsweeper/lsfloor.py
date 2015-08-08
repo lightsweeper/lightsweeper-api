@@ -144,17 +144,21 @@ class LSFloor():
             pollingLoop = pollEvents()
             staleSensor = 0
             while True:
-                event = next(pollingLoop)
-                r,c = event[0], event[1]
-                sensorPcnt = event[2]
                 try:
-                    staleSensor = self.view.tiles[r][c].sensor
-                except AttributeError:
-                    staleSensor = 0
-                if staleSensor != sensorPcnt:
-                    tile = self.view.tiles[r][c]
-                    tile.sensor = sensorPcnt
-                    self.view._root._events.put(event)
+                    event = next(pollingLoop)
+                except StopIteration:
+                    pass                    # No events in queue
+                if len(event) > 0:
+                    r,c = event[0], event[1]
+                    sensorPcnt = event[2]
+                    try:
+                        staleSensor = self.view.tiles[r][c].sensor
+                    except AttributeError:
+                        staleSensor = 0
+                    if staleSensor != sensorPcnt:
+                        tile = self.view.tiles[r][c]
+                        tile.sensor = sensorPcnt
+                        self.view._root._events.put(event)
 
     class _handleEvents(threading.Thread):
             # The _handleEvents class runs as a single thread from the root LSFloor

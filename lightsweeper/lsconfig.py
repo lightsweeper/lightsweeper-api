@@ -140,6 +140,15 @@ class LSFloorConfig:
 
     def __init__(self, configFile=None, rows=None, cols=None):
 
+        conf = readConfiguration()
+        try:
+            self.floorDir = conf["FLOORSDIR"]
+        except KeyError:
+            try:
+                self.floorDir = conf["CONFIGDIR"]
+            except KeyError:
+                self.floorDir = os.path.abspath(os.getcwd())
+
         if configFile is not None:
             self.fileName = self._formatFileName(configFile)
             try:
@@ -262,10 +271,13 @@ class LSFloorConfig:
                 message = "Your configuration was saved in {:s}".format(self.fileName)
         print(message)
 
+    def listFloorFiles (self):
+        return list(filter(lambda ls: ls.endswith(".floor"), os.listdir(self.floorDir)))
+
 
     def selectConfig(self):
         """
-            This function looks in for .floor files in the directory set by the
+            This function looks for .floor files in the directory set by the
             directive FLOORSDIR in the general configuration, or, if unset, in
             the current directory and prompts the user to select one, then loads
             it into this instance. 
@@ -273,13 +285,8 @@ class LSFloorConfig:
             Raises:
                 IOError                 if no .floor files are found
         """
-        conf = readConfiguration()
-        try:
-            floorDir = conf["CONFIGDIR"]
-        except KeyError:
-            floorDir = os.path.abspath(os.getcwd())
 
-        floorFiles = list(filter(lambda ls: ls.endswith(".floor"), os.listdir(floorDir)))
+        floorFiles = self.listFloorFiles()
         
         if len(floorFiles) is 0:
             raise IOError("No floor configuration found. Try running LSFloorConfigure.py")
@@ -288,7 +295,7 @@ class LSFloorConfig:
         else:
             print("\nFound multiple configurations: \n")
             fileName = userSelect(floorFiles, "\nWhich floor configuration would you like to use?")
-        absFloorConfig = os.path.abspath(os.path.join(floorDir, fileName))
+        absFloorConfig = os.path.abspath(os.path.join(self.floorDir, fileName))
         try:
             self.loadConfig(absFloorConfig)
         except CannotParseError as e:
@@ -298,6 +305,8 @@ class LSFloorConfig:
     def _formatFileName(self, fileName):
         if fileName.endswith(".floor") is False:
             fileName += ".floor"
+        if os.path.dirname(fileName) != self.floorDir:
+            fileName = os.path.join(self.floorDir, fileName)
         return fileName
         
     def _createVirtualConfig(self, rows, cols):
@@ -366,8 +375,8 @@ def userSelect(selectionList, message="Select an option from the list:"):
 
 
 def validateRowCol(numTiles, rowsOrCols, isVirtual=True):
-    print(numTiles)
-    print(rowsOrCols)
+ #   print(numTiles)
+ #   print(rowsOrCols)
 
     try:
         rowsOrCols = int(rowsOrCols)
