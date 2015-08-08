@@ -13,7 +13,7 @@ from lightsweeper.lsdisplay import LSDisplay
 from lightsweeper.lsaudio import LSAudio
 from lightsweeper.lsconfig import LSFloorConfig
 from lightsweeper.lsconfig import userSelect
-
+import lightsweeper.lsconfig as lsconfig
 
 from lightsweeper import Colors
 from lightsweeper import Shapes
@@ -107,7 +107,6 @@ class LSGameEngine():
             self.game.init()
         except AttributeError:
             self._warnOnce("{:s} has no init() method.".format(self.currentGame))
-
 
     def beginLoop(self, plays = 0):
         while True:
@@ -203,23 +202,31 @@ class LSGameEngine():
 
 HI_SCORE_CUTOFF = 5
 class HighScores():
-    def __init__(self, fname="scores", writeToSerial=False):
-        self.writeToSerial = writeToSerial
+    def __init__(self, filename="scores"):
+        conf = lsconfig.readConfiguration()
+        fname = os.path.join(conf["CONFIGDIR"], filename)
+        self.fname = fname
+        self.writeToSerial = False
+        self.highScoreThreshold = 0
+        self.scores = [0]
         #load scores from the card
         if self.writeToSerial:
             import serial
         #load in scores from a file
+        self._parseScores(fname)
+
+    def _parseScores(self, fname):
+        if not os.path.isfile(fname):
+            self.namesAndScores = [["000", 0]]
+            return()
+        with open(fname) as f:
+            self.namesAndScores = json.load(f)
+        for entry in self.namesAndScores:
+            self.scores.append(int(entry[1]))
+        if len(self.scores) < HI_SCORE_CUTOFF:
+            self.highScoreThreshold = 0
         else:
-            self.fname = fname
-            with open(fname) as f:
-                self.namesAndScores = json.load(f)
-            self.scores = []
-            for entry in self.namesAndScores:
-                self.scores.append(int(entry[1]))
-            if len(self.scores) < HI_SCORE_CUTOFF:
-                self.highScoreThreshold = 0
-            else:
-                self.highScoreThreshold = self.scores[HI_SCORE_CUTOFF-1]
+            self.highScoreThreshold = self.scores[HI_SCORE_CUTOFF-1]
 
     def isHighScore(self, score):
         #TODO: modify somehow to enable lower scores to be better depending on the game

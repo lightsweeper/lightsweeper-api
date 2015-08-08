@@ -142,9 +142,12 @@ class LSFloorConfig:
 
         conf = readConfiguration()
         try:
-            self.floorDir = conf["CONFIGDIR"]
+            self.floorDir = conf["FLOORSDIR"]
         except KeyError:
-            self.floorDir = os.path.abspath(os.getcwd())
+            try:
+                self.floorDir = conf["CONFIGDIR"]
+            except KeyError:
+                self.floorDir = os.path.abspath(os.getcwd())
 
         if configFile is not None:
             self.fileName = self._formatFileName(configFile)
@@ -271,7 +274,7 @@ class LSFloorConfig:
 
     def selectConfig(self):
         """
-            This function looks in for .floor files in the directory set by the
+            This function looks for .floor files in the directory set by the
             directive FLOORSDIR in the general configuration, or, if unset, in
             the current directory and prompts the user to select one, then loads
             it into this instance. 

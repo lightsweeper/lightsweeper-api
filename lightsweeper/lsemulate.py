@@ -11,6 +11,11 @@ import time
 import types
 
 try:
+    import pygame
+except ImportError:
+    pass
+
+try:
     from pygame.locals import *
 except ImportError:
     pass
