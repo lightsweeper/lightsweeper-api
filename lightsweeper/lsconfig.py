@@ -271,6 +271,9 @@ class LSFloorConfig:
                 message = "Your configuration was saved in {:s}".format(self.fileName)
         print(message)
 
+    def listFloorFiles (self):
+        return list(filter(lambda ls: ls.endswith(".floor"), os.listdir(self.floorDir)))
+
 
     def selectConfig(self):
         """
@@ -283,7 +286,7 @@ class LSFloorConfig:
                 IOError                 if no .floor files are found
         """
 
-        floorFiles = list(filter(lambda ls: ls.endswith(".floor"), os.listdir(self.floorDir)))
+        floorFiles = self.listFloorFiles()
         
         if len(floorFiles) is 0:
             raise IOError("No floor configuration found. Try running LSFloorConfigure.py")
