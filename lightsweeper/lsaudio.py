@@ -38,6 +38,7 @@ class _lsAudio:
         pass
 
     def playSound(self, filename, custom_relative_volume=1.0):
+        conf = lsconfig.readConfiguration()
         relativeSounds = os.path.abspath(sys.path[0])
         gameSounds = os.path.join(conf["GAMESDIR"], "sounds")
         systemSounds = os.path.join(os.path.dirname(os.path.abspath(__file__)), "sounds")
