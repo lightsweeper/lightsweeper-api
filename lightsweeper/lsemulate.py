@@ -47,7 +47,7 @@ class LSEmulateFloor(lsfloor.LSFloor):
             This method should be a generator that yields tuples of the form
             (row, col, sensor-reading)
         """
-        pass
+        yield()
 
 class LSASCIIFloor(LSEmulateFloor):
 
