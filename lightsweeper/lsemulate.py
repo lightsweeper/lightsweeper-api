@@ -9,10 +9,20 @@ import sys
 import time
 import types
 
-import pygame
-from pygame.locals import *
+try:
+    from pygame.locals import *
+except ImportError:
+    pass
 
 wait = time.sleep
+
+
+class BadEmulator(EnvironmentError):
+    """
+        Custom exception returned when a selected emulator cannot be used due
+        to unconfigured or misconfigured environment.
+    """
+    pass
 
 
 class LSEmulateFloor(lsfloor.LSFloor):
@@ -45,6 +55,11 @@ class LSPygameFloor(LSEmulateFloor):
     
     
     def init(self):
+
+        try:
+            import pygame
+        except ImportError:
+            raise BadEmulator("Pygame is not installed so cannot use Pygame emulator.")
 
         pygame.init()
 

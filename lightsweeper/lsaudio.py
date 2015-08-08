@@ -52,7 +52,10 @@ class _lsAudio:
             else:
                 print("WARNING: Cannot find {:s}.".format(filename))
                 return
-        self._playSound
+        self._playSound(filename)
+
+    def _playSound(self, filename):
+        pass
 
     def playLoadedSound(self, name):
         pass
@@ -65,7 +68,7 @@ class _lsAudio:
 
 
 class _pygameAudio(_lsAudio):
-    import pygame.midi
+  #  import pygame.midi
     def __init__(self, initSound=True, useMidi = False):
         self.useMidi = useMidi
         print("Using pygame for Audio...")
