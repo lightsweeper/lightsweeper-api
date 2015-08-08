@@ -36,7 +36,7 @@ class _lsAudio:
     def loadSound(self, filename, name):
         pass
 
-    def playSound(self, filename):
+    def playSound(self, filename, custom_relative_volume=1.0):
         relativeSounds = os.path.abspath(sys.path[0])
         gameSounds = os.path.join(relativeSounds, "sounds") # Hacky hack, should use lsconfig
         systemSounds = os.path.join(os.path.dirname(os.path.abspath(__file__)), "sounds")
@@ -52,7 +52,7 @@ class _lsAudio:
             else:
                 print("WARNING: Cannot find {:s}.".format(filename))
                 return
-        self._playSound
+        self._playSound(filename, custom_relative_volume)
 
     def playLoadedSound(self, name):
         pass
