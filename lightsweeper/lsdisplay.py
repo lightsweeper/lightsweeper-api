@@ -2,6 +2,7 @@
 
 from lightsweeper.lsfloor import LSFloor
 from lightsweeper.lsemulate import LSPygameFloor
+from lightsweeper.lsemulate import LSASCIIFloor
 from lightsweeper.lsemulate import BadEmulator
 from lightsweeper.lsconfig import LSFloorConfig
 
@@ -41,7 +42,7 @@ class LSDisplay():
         try:
             self.floor.register(LSPygameFloor)      # For now it's the only emulator we have
         except BadEmulator:
-            pass
+            self.floor.register(LSASCIIFloor)
 
         self.rows = conf.rows
         self.cols = conf.cols
