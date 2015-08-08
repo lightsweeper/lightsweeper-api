@@ -6,6 +6,7 @@ import random
 import sys
 
 from lightsweeper.lsconfig import userSelect
+from lightsweeper import lsconfig
 
 class _lsAudio:
     def __init__(self, initSound=True, useMidi=False):
@@ -36,9 +37,10 @@ class _lsAudio:
     def loadSound(self, filename, name):
         pass
 
-    def playSound(self, filename):
+    def playSound(self, filename, custom_relative_volume=-1):
+        conf = lsconfig.readConfiguration()
         relativeSounds = os.path.abspath(sys.path[0])
-        gameSounds = os.path.join(relativeSounds, "sounds") # Hacky hack, should use lsconfig
+        gameSounds = os.path.join(conf["GAMESDIR"], "sounds")
         systemSounds = os.path.join(os.path.dirname(os.path.abspath(__file__)), "sounds")
         if (filename == os.path.abspath(filename)):     # filename is absolute
             pass
@@ -54,7 +56,7 @@ class _lsAudio:
                 return
         self._playSound(filename)
 
-    def _playSound(self, filename):
+    def _playSound(self, filename, custom_relative_volume=-1):
         pass
 
     def playLoadedSound(self, name):
