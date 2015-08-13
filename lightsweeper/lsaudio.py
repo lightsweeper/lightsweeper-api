@@ -9,11 +9,15 @@ from lightsweeper.lsconfig import userSelect
 from lightsweeper import lsconfig
 
 class _lsAudio:
-    def __init__(self, initSound=True, useMidi=False):
+    def __init__(self, initSound=True, useMidi=False, debug=True):
         self.soundVolume = 1.0
         self.loadedSongs = []
         self.soundDictionary = {}
+        self.debug = debug
         self.playSound('StartUp.wav')
+
+    def setDebug(self, debug):
+        self.debug = debug
 
     def heartbeat(self):
         pass
@@ -153,7 +157,8 @@ class _pygameAudio(_lsAudio):
         self.soundDictionary[name] = sound
 
     def _playSound(self, filename, custom_relative_volume=-1):
-        print("playing sound", filename)
+        if self.debug:
+            print("playing sound", filename)
         sound = pygame.mixer.Sound(filename)
         if custom_relative_volume >= 0:
             sound.set_volume(custom_relative_volume * self.soundVolume)
