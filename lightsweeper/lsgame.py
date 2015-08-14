@@ -107,7 +107,7 @@ class LSGameEngine():
         except AttributeError:
             self._warnOnce("{:s} has no init() method.".format(self.currentGame))
 
-    def beginLoop(self, plays = 0):
+    def beginLoop(self, plays = 1):
         while True:
             if plays is not 0 and self.numPlays <= plays:
                 self.enterFrame()
@@ -123,7 +123,8 @@ class LSGameEngine():
     def gameOver(self):
         print(" G A M E  O V E R ")
         self.display.clearAll()
-        self.display.setMessage(int(self.display.rows/2)-1,"GAME OVER")
+        self.display.setMessage(int(self.display.rows/2)-1,"GAME", start=int(self.display.cols/2)-2)
+        self.display.setMessage(int(self.display.rows/2), "OVER", start=int(self.display.cols/2)-2)
         self.display.heartbeat()
         input("--Press any key to exit--\n")
         self.display.floor.saveAndExit(0)
