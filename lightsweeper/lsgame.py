@@ -99,10 +99,9 @@ class LSGameEngine():
         print("LSGameEngine: Starting {:s}...".format(self.currentGame))
         self.game = GAME(self.display, self.audio, self.ROWS, self.COLUMNS)
         self.startGame = time.time()
-     #   game = self.game
-     #   self.game.frameRate = FPS
         self.game.sensors = self.sensorMatrix
-        self.numPlays += 1   # TODO: Check if type is screensaver
+        if not isinstance(self.game, LSScreenSaver):
+            self.numPlays += 1
         try:
             self.game.init()
         except AttributeError:
