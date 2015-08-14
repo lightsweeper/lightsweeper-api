@@ -39,10 +39,26 @@ class _lsAudio:
         pass
 
     def loadSound(self, filename, name):
-        pass
+        conf = lsconfig.readConfiguration(silent=True)
+        relativeSounds = os.path.abspath(sys.path[0])
+        gameSounds = os.path.join(conf["GAMESDIR"], "sounds")
+        systemSounds = os.path.join(os.path.dirname(os.path.abspath(__file__)), "sounds")
+        if (filename == os.path.abspath(filename)):     # filename is absolute
+            pass
+        else:
+            if os.path.isfile(os.path.join(systemSounds, filename)):
+                filename = os.path.join(systemSounds, filename)
+            elif os.path.isfile(os.path.join(gameSounds, filename)):
+                filename = os.path.join(gameSounds, filename)
+            elif os.path.isfile(os.path.join(relativeSounds, filename)):
+                filename = os.path.join(relativeSounds, filename)
+            else:
+                print("WARNING: Cannot find {:s}.".format(filename))
+                return
+        self._loadSound(filename, name)
 
     def playSound(self, filename, custom_relative_volume=1.0):
-        conf = lsconfig.readConfiguration()
+        conf = lsconfig.readConfiguration(silent=True)
         relativeSounds = os.path.abspath(sys.path[0])
         gameSounds = os.path.join(conf["GAMESDIR"], "sounds")
         systemSounds = os.path.join(os.path.dirname(os.path.abspath(__file__)), "sounds")
@@ -60,8 +76,8 @@ class _lsAudio:
                 return
         self._playSound(filename, custom_relative_volume)
 
-    def playLoadedSound(self, name):
-        pass
+    def playLoadedSound(self, name, custom_relative_volume=1.0):
+        self._playLoadedSound(name, custom_relative_volume)
 
     def stopSounds(self):
         pass
@@ -153,7 +169,7 @@ class _pygameAudio(_lsAudio):
 
     def _loadSound(self, filename, name):
         print("loading sound " + filename + " into " + name)
-        sound = pygame.mixer.Sound("sounds/" + filename)
+        sound = pygame.mixer.Sound(filename)
         self.soundDictionary[name] = sound
 
     def _playSound(self, filename, custom_relative_volume=-1):
@@ -173,8 +189,9 @@ class _pygameAudio(_lsAudio):
         #except:
         #    print("Could not load file " + filename)
 
-    def _playLoadedSound(self, name):
+    def _playLoadedSound(self, name, custom_relative_volume):
         sound = self.soundDictionary[name]
+        sound.set_volume(custom_relative_volume * self.soundVolume)
         pygame.mixer.Sound.play(sound)
 
     def stopSounds(self):
