@@ -6,6 +6,10 @@ import time
 
 from collections import defaultdict, OrderedDict
 
+class NoCartReader(Exception):
+    """ Custom exception returned when no cartridge readers are found. """
+    pass
+
 # Todo: exceptions
 # Todo: fix multiple instances
 
@@ -18,7 +22,7 @@ class LSRFID:
 
     def __init__(self):
 
-        self.gameRunning = False
+        self.resetState()
 
         try:
             import serial
@@ -32,6 +36,12 @@ class LSRFID:
         d = threading.Thread(name='cartParserd', target=self.cartParser)
         d.setDaemon(True)
         d.start()
+
+    def resetState(self):
+        self.gameRunning = False
+        self.gameID = 0
+        self.loadHint = False
+        self.scores = dict()
 
     def findReader (self):        
         for port in self.availPorts():
@@ -49,8 +59,7 @@ class LSRFID:
                     print("Cartridge reader detected at: {:s}".format(port)) # Debugging
                     getLine(s)  # Purges the following blank line from the buffer
                     return(s)
-        print("No cartridge reader found!")
-        raise Exception     # Todo: actual exception
+        raise NoCartReader("No cartridge reader found!")
 
     def addScore(self, name, score):
         if not self.gameRunning:
@@ -78,14 +87,11 @@ class LSRFID:
       #      print(" ".join(response)) # Debugging
             if response[0] == "CART":
                 if response[1] == "INSERTED":
-                    self.gameRunning = True
                     self.gameID = hex(int("".join(response[2:]), 16))
+                    self.gameRunning = True
                     self.sendScoresRequest()
                 elif response[1] == "PULLED":
-                    self.gameRunning = False
-                    self.gameID = 0
-                    self.loadHint = ""
-                    self.scores = dict()
+                    self.resetState()
                 else:
                     print("Response not recognized" + " ".join(response))
             elif response[0] == "LOAD":
@@ -103,10 +109,10 @@ class LSRFID:
                 print("Score not added, name must be <= 3 characters.")
             elif response[0] == "NO" and response[1] == "CART":
                 print("Cartridge removed during response write!")
+            elif response[0] == "READY":        # Cartridge reader reset
+                self.resetState()
             else:
                 print("Response not recognized: " + " ".join(response))
-
-
 
     def availPorts(self):
         """
@@ -143,7 +149,6 @@ def main():
     print("Insert a cartridge to test.")
     while not rfidcart.gameRunning:
         pass
-    time.sleep(1)
     for score, names in rfidcart.scores.items():
         for name in names:
             print("{:s}    {:d}".format(name, score))

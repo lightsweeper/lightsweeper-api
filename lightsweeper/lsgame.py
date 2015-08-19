@@ -121,13 +121,13 @@ class LSGameEngine():
         # TODO: Instead of quitting, go to game/demo screen and wait for someone to reset
 
     def gameOver(self):
-        print(" G A M E  O V E R ")
+        print(" G A M E  O V E R                 ")
         self.display.clearAll()
         self.display.setMessage(int(self.display.rows/2)-1,"GAME", start=int(self.display.cols/2)-2)
         self.display.setMessage(int(self.display.rows/2), "OVER", start=int(self.display.cols/2)-2)
         self.display.heartbeat()
         input("--Press any key to exit--\n")
-        self.display.floor.saveAndExit(0)
+#        self.display.floor.saveAndExit(0)
 
     def handleTileStepEvent(self, row, col, sensorPcnt):
         self.initLock.wait()
