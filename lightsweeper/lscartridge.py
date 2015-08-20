@@ -79,7 +79,13 @@ class LSRFID:
             return
         for char in "SCORES\n":
             self.serial.write(char.encode())
-        
+
+    def setHint(self, hint):
+        if not self.gameRunning:
+            print("No cartridge inserted!")
+            return
+        for char in "SETLOADTARGET {:s}\n".format(hint):
+            self.serial.write(char.encode())
 
     def cartParser(self):
         while True:
@@ -104,7 +110,7 @@ class LSRFID:
                     scores[int(score)].append(name)
                 self.scores = OrderedDict(sorted(scores.items(), reverse = True))
             elif response[0] == "OK":
-                print("Score added.") # Debugging
+                print("LSRFID: OK") # Debugging
             elif response[0] == "INVALID" and response[1] == "NAME":
                 print("Score not added, name must be <= 3 characters.")
             elif response[0] == "NO" and response[1] == "CART":
