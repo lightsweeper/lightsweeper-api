@@ -151,8 +151,8 @@ class LSGameEngine():
         except AttributeError as e:
         #    raise(e)    # Debugging
             self._warnOnce("{:s} has no init() method.".format(self.currentGame))
-
-    def beginLoop(self, plays = 1):
+        
+    def beginLoop(self, plays = 0):
         while True:
             if plays is not 0 and self.numPlays <= plays:
                 self.enterFrame()
