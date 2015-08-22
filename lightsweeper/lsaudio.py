@@ -19,8 +19,8 @@ class _lsAudio:
     def setDebug(self, debug):
         self.debug = debug
 
-    def heartbeat(self):
-        pass
+ #   def heartbeat(self):
+  #      pass
 
     def loadSong(self, filename, name):
         pass
@@ -67,8 +67,6 @@ class _lsAudio:
             self.loadSound(name, name)
         self._playSound(name, custom_relative_volume)
 
-  #  def playLoadedSound(self, name, custom_relative_volume=1.0):
-  #      self._playLoadedSound(name, custom_relative_volume)
 
     def stopSounds(self):
         print('stopSounds(): somebody code me plz')
@@ -89,28 +87,6 @@ class _pygameAudio(_lsAudio):
         atexit.register(self._cleanup)
         _lsAudio.__init__(self)
 
-    def _initMidi(self):
-        print("Initializing MIDI subsystem...")
-        pygame.midi.init()
-        
-        midiOpts = dict()
-        for i in range( pygame.midi.get_count() ):
-            r = pygame.midi.get_device_info(i)
-            (interface, name, inp, outp, opened) = r
-            if outp:
-                midiPortString = "{:s} ({:s})".format(name.decode("utf-8"), interface.decode("utf-8"))
-                midiOpts[midiPortString] = i
-        if len(midiOpts) == 0:
-            print("Cannot play midi, WEEPWEEPWEEPWEP")
-            sys.exit()
-        elif len(midiOpts) == 1:
-            midiPort = 0
-        else:
-            print("Multiple targets found:")
-            midiSelect = userSelect(list(midiOpts.keys()), "\nSelect a midi port:")
-            midiPort = midiOpts[midiSelect]
-        self.midi_out = pygame.midi.Output(midiPort, 0)
-
     def _cleanup(self):
         print("\nCleaning up...")
         if self.useMidi is True:
@@ -124,11 +100,11 @@ class _pygameAudio(_lsAudio):
         print(mypid)
         
 
-    def heartbeat(self):
+ #   def heartbeat(self):
         #for event in pygame.event.get():
         #    if event.type == self.SONG_END:
         #        self.shuffleSongs()
-        pass
+  #      pass
 
     def _loadSong(self, filename, name):
         try:
@@ -177,14 +153,39 @@ class _pygameAudio(_lsAudio):
         for name in self.soundDictionary.keys():
             pygame.mixer.Sound.stop(self.soundDictionary[name])
 
-    def midiSoundOn(self, instrument=19, note=72):
-        self.midi_out.set_instrument(instrument)
-        self.midi_out.note_on(note,int(self.soundVolume * 127))
-
     def setSoundVolume(self, vol):
         #print("setting sound vol:" + str(vol))
         #self.soundVolume = vol
         pass
+
+  # Midi support is very experimental
+
+    def _initMidi(self):
+        print("Initializing MIDI subsystem...")
+        pygame.midi.init()
+        
+        midiOpts = dict()
+        for i in range( pygame.midi.get_count() ):
+            r = pygame.midi.get_device_info(i)
+            (interface, name, inp, outp, opened) = r
+            if outp:
+                midiPortString = "{:s} ({:s})".format(name.decode("utf-8"), interface.decode("utf-8"))
+                midiOpts[midiPortString] = i
+        if len(midiOpts) == 0:
+            print("Cannot play midi, WEEPWEEPWEEPWEP")
+            sys.exit()
+        elif len(midiOpts) == 1:
+            midiPort = 0
+        else:
+            print("Multiple targets found:")
+            midiSelect = userSelect(list(midiOpts.keys()), "\nSelect a midi port:")
+            midiPort = midiOpts[midiSelect]
+        self.midi_out = pygame.midi.Output(midiPort, 0)
+
+    def midiSoundOn(self, instrument=19, note=72):
+        self.midi_out.set_instrument(instrument)
+        self.midi_out.note_on(note,int(self.soundVolume * 127))
+
 
 try:
     import pygame

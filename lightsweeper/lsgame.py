@@ -1,7 +1,7 @@
 """ Contains methods responsible for running and interacting with LightSweeper games """
 
 import copy
-import json
+#import json
 import os
 import random
 import shelve
@@ -219,7 +219,7 @@ class LSGameEngine():
         if not self.game.ended:
             self.game.heartbeat(self.moves)
             self.display.heartbeat()
-            self.audio.heartbeat()
+     #       self.audio.heartbeat()
         else:
             self.newGame(SAVERS)    # Super hacky, should be in gameOver
          #   self.newGame(self.GAME)
