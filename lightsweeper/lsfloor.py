@@ -188,7 +188,7 @@ class LSFloor():
                 try:
                     stale = tile.sensor
                 except AttributeError:
-                    print("INFO: The tile at ({:d},{:d}) has been touched for the very first time.".format(row,col))
+                  #  print("INFO: The tile at ({:d},{:d}) has been touched for the very first time.".format(row,col)) # Debugging
                     stale = 0
                 if stale is 0:
                     print("Stepped on ({:d},{:d})".format(row,col)) # Debugging

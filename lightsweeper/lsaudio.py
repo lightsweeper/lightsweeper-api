@@ -39,7 +39,7 @@ class _lsAudio:
         pass
 
     def loadSound(self, filename, name):
-        conf = lsconfig.readConfiguration(silent=True)
+        conf = lsconfig.readConfiguration()
         relativeSounds = os.path.abspath(sys.path[0])
         gameSounds = os.path.join(conf["GAMESDIR"], "sounds")
         systemSounds = os.path.join(os.path.dirname(os.path.abspath(__file__)), "sounds")
@@ -58,7 +58,7 @@ class _lsAudio:
         self._loadSound(filename, name)
 
     def playSound(self, filename, custom_relative_volume=1.0):
-        conf = lsconfig.readConfiguration(silent=True)
+        conf = lsconfig.readConfiguration()
         relativeSounds = os.path.abspath(sys.path[0])
         gameSounds = os.path.join(conf["GAMESDIR"], "sounds")
         systemSounds = os.path.join(os.path.dirname(os.path.abspath(__file__)), "sounds")
@@ -174,7 +174,7 @@ class _pygameAudio(_lsAudio):
 
     def _playSound(self, filename, custom_relative_volume=-1):
         if self.debug:
-            print("playing sound", filename)
+            print("playing sound", os.path.basename(filename))
         sound = pygame.mixer.Sound(filename)
         if custom_relative_volume >= 0:
             sound.set_volume(custom_relative_volume * self.soundVolume)
