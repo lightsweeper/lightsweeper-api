@@ -26,7 +26,7 @@ class _lsAudio:
         pass
 
     def playSong(self, filename, loops=0):
-        pass
+        self.playSound(filename)            # Temporary hack for api consistency
 
     def stopSong(self, fadeOut = 0.1):
         pass
