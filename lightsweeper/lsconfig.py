@@ -69,7 +69,7 @@ def getConfigurationPaths(configurationFilePath = None):
             e = "{:s} does not exist.".format(os.path.join(cf, fileName) if os.path.exists(cf) else cf)
         raise(FileDoesNotExistError(e))
     
-def readConfiguration (configurationFilePath = None, silent = False):
+def readConfiguration (configurationFilePath = None):
     """
         Attempts to load configuration details from lightsweeper conf files.
         configurationFilePath can be either a a valid configuration file name
@@ -78,11 +78,11 @@ def readConfiguration (configurationFilePath = None, silent = False):
     
     pathList = getConfigurationPaths(configurationFilePath)
     
-    if not silent:
-        if len(pathList) is 1:
-            print("Loading options from {:s}".format(pathList[0]))
-        else:
-            print("Loading overrides from {:s}".format(pathList[-1]))
+ #   if not silent:
+ #       if len(pathList) is 1:
+ #           print("Loading options from {:s}".format(pathList[0]))
+ #       else:
+ #           print("Loading overrides from {:s}".format(pathList[-1]))
 
     configuration = DEFAULTCONFIGURATION
     configuration['CONFIGDIR'] = os.path.dirname(pathList[0])

@@ -24,9 +24,11 @@ NINE = SEG_A + SEG_B + SEG_C + SEG_D + SEG_F + SEG_G
 
 #letters not included: K (looks like H), M (two n's), W (two u's), X (looks like H)
 A = SEG_A + SEG_B + SEG_C + SEG_E + SEG_F + SEG_G
-B = SEG_C + SEG_D + SEG_E + SEG_F + SEG_G
+b = SEG_C + SEG_D + SEG_E + SEG_F + SEG_G
+B = EIGHT
 C = SEG_A + SEG_D + SEG_E + SEG_F
-D = SEG_B + SEG_C + SEG_D + SEG_E + SEG_G
+d = SEG_B + SEG_C + SEG_D + SEG_E + SEG_G
+D = ZERO
 E = SEG_A + SEG_D + SEG_E + SEG_F + SEG_G
 F = SEG_A + SEG_E + SEG_F + SEG_G
 G = SEG_A + SEG_B + SEG_C + SEG_D + SEG_F + SEG_G
@@ -47,12 +49,17 @@ S = SEG_A + SEG_C + SEG_D + SEG_F + SEG_G
 T = SEG_D + SEG_E + SEG_F + SEG_G
 u = SEG_C + SEG_D + SEG_E
 U = SEG_B + SEG_C + SEG_D + SEG_E + SEG_F
+W = SEG_C + SEG_D
 V = SEG_C + SEG_D
 Y = SEG_B + SEG_C + SEG_D + SEG_F + SEG_G
 Z = SEG_A + SEG_B + SEG_D + SEG_E + SEG_G
 
 DASH = SEG_G
 UNDERSCORE = SEG_D
+
+UP_ARROW = SEG_A + SEG_B + SEG_F
+DOWN_ARROW = SEG_C + SEG_D + SEG_E
+
 
 def digitToHex(digit):
     if digit is 0:
@@ -152,8 +159,88 @@ def digitToLetter(digit):
     else:
         return 0x0
 
-#Returns a list of shapes needed to make this letter, includes awkward ones like X / H / K
 def charToShape(c):
+    if c.lower() == 'a':
+        return A
+    if c.lower() == 'b':
+        return B
+    if c.lower() == 'c':
+        return C
+    if c.lower() == 'd':
+        return D
+    if c.lower() == 'e':
+        return E
+    if c.lower() == 'f':
+        return F
+    if c.lower() == 'g':
+        return G
+    if c.lower() == 'h':
+        return H
+    if c.lower() == 'i':
+        return I
+    if c.lower() == 'j':
+        return J
+    if c.lower() == 'k':
+        return K
+    if c.lower() == 'l':
+        return L
+    if c.lower() == 'm':
+        return N
+    if c.lower() == 'n':
+        return N
+    if c.lower() == 'o':
+        return O
+    if c.lower() == 'p':
+        return P
+    if c.lower() == 'q':
+        return Q
+    if c.lower() == 'r':
+        return R
+    if c.lower() == 's':
+        return S
+    if c.lower() == 't':
+        return T
+    if c.lower() == 'u':
+        return U
+    if c.lower() == 'v':
+        return V
+    if c.lower() == 'w':
+        return W
+    if c.lower() == 'x':
+        return H
+    if c.lower() == 'y':
+        return Y
+    if c.lower() == 'z':
+        return Z
+    if c.lower() == '1':
+        return ONE
+    if c.lower() == '2':
+        return TWO
+    if c.lower() == '3':
+        return THREE
+    if c.lower() == '4':
+        return FOUR
+    if c.lower() == '5':
+        return FIVE
+    if c.lower() == '6':
+        return SIX
+    if c.lower() == '7':
+        return SEVEN
+    if c.lower() == '8':
+        return EIGHT
+    if c.lower() == '9':
+        return NINE
+    if c.lower() == '0':
+        return ZERO
+    if c == '-':
+        return DASH
+    if c == '_':
+        return SEG_D
+    else:
+        return 0x0
+
+#Returns a list of shapes needed to make this letter, includes awkward ones like X / H / K
+def charToShapes(c):
     if c.lower() == 'a':
         return [A]
     if c.lower() == 'b':
@@ -236,5 +323,5 @@ def charToShape(c):
 def stringToShapes(s):
     shapes = []
     for c in s:
-        shapes += charToShape(c)
+        shapes += charToShapes(c)
     return shapes

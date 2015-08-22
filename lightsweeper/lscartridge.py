@@ -34,14 +34,15 @@ class LSRFID:
         self._list_ports = list_ports
         self.serial = self.findReader()
         d = threading.Thread(name='cartParserd', target=self.cartParser)
-        d.setDaemon(True)
+    #    d.setDaemon(True)
         d.start()
 
     def resetState(self):
         self.gameRunning = False
+        self.loaded = False
         self.gameID = 0
         self.loadHint = False
-        self.scores = dict()
+        self.scores = defaultdict(list)
 
     def findReader (self):        
         for port in self.availPorts():
@@ -71,7 +72,13 @@ class LSRFID:
         cmd = "ADDSCORE {:s} {:d}\n".format(name, score)
         for char in cmd:
             self.serial.write(char.encode())
-        self.sendScoresRequest()
+        scores = self.scores
+        try:
+            scores[score].append(name)
+        except KeyError:
+            scores[score] = [name]
+        self.scores = scores
+      #  self.scores = OrderedDict(sorted(scores.items(), reverse = True))
 
     def sendScoresRequest(self):
         if not self.gameRunning:
@@ -93,8 +100,9 @@ class LSRFID:
       #      print(" ".join(response)) # Debugging
             if response[0] == "CART":
                 if response[1] == "INSERTED":
-                    self.gameID = hex(int("".join(response[2:]), 16))
+                    self.gameID = int("".join(response[2:]), 16)
                     self.gameRunning = True
+                    time.sleep(1) # Give the reader a chance to initialize its internals
                     self.sendScoresRequest()
                 elif response[1] == "PULLED":
                     self.resetState()
@@ -102,13 +110,15 @@ class LSRFID:
                     print("Response not recognized" + " ".join(response))
             elif response[0] == "LOAD":
                 self.loadHint = " ".join(response[1:])
-            elif bool(re.search('\d/\d', response[0])):
+            elif bool(re.search('\d\/\d', response[0])):
                 numScores, totalScores = response[0].split("/")
                 scores = defaultdict(list)
                 for i in range(int(numScores)):
                     name, score = getLine(self.serial).split()
                     scores[int(score)].append(name)
-                self.scores = OrderedDict(sorted(scores.items(), reverse = True))
+            #    self.scores = OrderedDict(sorted(scores.items(), reverse = True))
+                self.scores = scores
+                self.loaded = True
             elif response[0] == "OK":
                 print("LSRFID: OK") # Debugging
             elif response[0] == "INVALID" and response[1] == "NAME":
