@@ -38,7 +38,7 @@ class _lsAudio:
     def shuffleSongs(self):
         pass
 
-    def loadSound(self, filename, name):
+    def loadSound(self, filename, name=None):
         conf = lsconfig.readConfiguration()
         relativeSounds = os.path.abspath(sys.path[0])
         gameSounds = os.path.join(conf["GAMESDIR"], "sounds")
@@ -55,29 +55,20 @@ class _lsAudio:
             else:
                 print("WARNING: Cannot find {:s}.".format(filename))
                 return
+        if name is None:
+            name = os.path.basename(filename).split(".")[0]
+        print("Loading sound " + filename + " into " + name)
         self._loadSound(filename, name)
 
-    def playSound(self, filename, custom_relative_volume=1.0):
-        conf = lsconfig.readConfiguration()
-        relativeSounds = os.path.abspath(sys.path[0])
-        gameSounds = os.path.join(conf["GAMESDIR"], "sounds")
-        systemSounds = os.path.join(os.path.dirname(os.path.abspath(__file__)), "sounds")
-        if (filename == os.path.abspath(filename)):     # filename is absolute
-            pass
-        else:
-            if os.path.isfile(os.path.join(systemSounds, filename)):
-                filename = os.path.join(systemSounds, filename)
-            elif os.path.isfile(os.path.join(gameSounds, filename)):
-                filename = os.path.join(gameSounds, filename)
-            elif os.path.isfile(os.path.join(relativeSounds, filename)):
-                filename = os.path.join(relativeSounds, filename)
-            else:
-                print("WARNING: Cannot find {:s}.".format(filename))
-                return
-        self._playSound(filename, custom_relative_volume)
+    def playSound(self, name, custom_relative_volume=1.0):
+        try:
+            sound = self.soundDictionary[name]
+        except KeyError:
+            self.loadSound(name, name)
+        self._playSound(name, custom_relative_volume)
 
-    def playLoadedSound(self, name, custom_relative_volume=1.0):
-        self._playLoadedSound(name, custom_relative_volume)
+  #  def playLoadedSound(self, name, custom_relative_volume=1.0):
+  #      self._playLoadedSound(name, custom_relative_volume)
 
     def stopSounds(self):
         pass
@@ -126,7 +117,9 @@ class _pygameAudio(_lsAudio):
          #   del self.midi_out       # Prevents "Bad pointer" error on exit
             pygame.midi.quit()
      #   pygame.mixer.quit()
-        os._exit(1)                 # Ugly, but pygame.mixer.quit() hangs debian (due to an SDL bug: https://bugs.debian.org/cgi-bin/bugreport.cgi?bug=708760)
+        os._exit(1)                 # Ugly, but pygame.mixer.quit() hangs debian 
+                                    # due to an SDL bug:
+                                    # https://bugs.debian.org/cgi-bin/bugreport.cgi?bug=708760
         mypid = os.getpid()
         print(mypid)
         
@@ -168,30 +161,16 @@ class _pygameAudio(_lsAudio):
         pygame.mixer.music.set_endevent(self.SONG_END)
 
     def _loadSound(self, filename, name):
-        print("loading sound " + filename + " into " + name)
         sound = pygame.mixer.Sound(filename)
         self.soundDictionary[name] = sound
 
-    def _playSound(self, filename, custom_relative_volume=-1):
-        if self.debug:
-            print("playing sound", os.path.basename(filename))
-        sound = pygame.mixer.Sound(filename)
+    def _playSound(self, name, custom_relative_volume=-1):
+        print("Playing sound", name)
+        sound = self.soundDictionary[name]
         if custom_relative_volume >= 0:
             sound.set_volume(custom_relative_volume * self.soundVolume)
         else:
             sound.set_volume(self.soundVolume)
-        self.soundDictionary[filename] = sound
-        pygame.mixer.Sound.play(sound)
-        #do we need this code?        
-        #try:
-        #    pygame.mixer.music.load("sounds/" + filename)
-        #    pygame.mixer.music.play(1)
-        #except:
-        #    print("Could not load file " + filename)
-
-    def _playLoadedSound(self, name, custom_relative_volume):
-        sound = self.soundDictionary[name]
-        sound.set_volume(custom_relative_volume * self.soundVolume)
         pygame.mixer.Sound.play(sound)
 
     def stopSounds(self):
