@@ -213,7 +213,6 @@ class LSGameEngine():
         if self.game.duration is not 0:
             playTime = (time.time() - self.startGame)
             if playTime > self.game.duration:
-            #    self.game.ended = True
                 self.newGame(self.GAME)
         startEnterFrame = time.time()
         if not self.game.ended:

@@ -50,7 +50,7 @@ class LSDisplay():
 
         if initScreen is True:
             self.splash()
-            wait(2)
+            wait(3)
             self.clearAll()
 
 
