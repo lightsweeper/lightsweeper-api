@@ -80,7 +80,7 @@ class _lsAudio:
         self._playLoadedSound(name, custom_relative_volume)
 
     def stopSounds(self):
-        pass
+        print('stopSounds(): somebody code me plz')
 
     def setSoundVolume(self, vol):
         self.soundVolume = vol
