@@ -62,25 +62,25 @@ DOWN_ARROW = SEG_C + SEG_D + SEG_E
 
 
 def digitToHex(digit):
-    if digit is 0:
+    if digit == 0:
         return ZERO
-    if digit is 1:
+    if digit == 1:
         return ONE
-    if digit is 2:
+    if digit == 2:
         return TWO
-    if digit is 3:
+    if digit == 3:
         return THREE
-    if digit is 4:
+    if digit == 4:
         return FOUR
-    if digit is 5:
+    if digit == 5:
         return FIVE
-    if digit is 6:
+    if digit == 6:
         return SIX
-    if digit is 7:
+    if digit == 7:
         return SEVEN
-    if digit is 8:
+    if digit == 8:
         return EIGHT
-    if digit is 9:
+    if digit == 9:
         return NINE
 
 def randomDigitInHex():
