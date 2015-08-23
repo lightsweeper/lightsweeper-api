@@ -299,9 +299,10 @@ class LSFloor():
         try:
             tile.set(shape, color)
         except AttributeError:
-            print("Set failed: No tile exists at ({:d},{:d}).".format(row, col))  # TODO: move tile = self.tile[row][col] to a utility function
-                                                                                  # that checks tile validity and replace these try/except blocks
-                                                                                  # here and in setColor/setShape/setDigit
+            print("Set failed: No tile exists at ({:d},{:d}).".format(int(row), int(col))) 
+        # TODO: move tile = self.tile[row][col] to a utility function
+        # that checks tile validity and replace these try/except blocks
+        # here and in setColor/setShape/setDigit
 
     def setRow(self, row, shape, color):
         for col,tile in self.tiles[row].items():

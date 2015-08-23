@@ -153,7 +153,7 @@ def getLine(pySerialObject):
     dataBuffer = str()
     while True:
         char = pySerialObject.read(1)
-        print(char.decode("ASCII")) #Debugging
+        print(char.decode("ASCII"), end=" ") #Debugging
         if char != b'\n':
             dataBuffer += char.decode("ASCII")
         else:
