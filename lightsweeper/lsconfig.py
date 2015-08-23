@@ -495,7 +495,6 @@ def configWithKeyboard(floorConfig, tilepile):
                     print("Tile ({:d}, {:d}) has already been configured!".format(row, col))
                     rcHash = 0
                 myTile.setColor(0)
-                print(mappedAddrs)
         print("")
     floorConfig.config = config
     return floorConfig
