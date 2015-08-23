@@ -376,10 +376,8 @@ def userSelect(selectionList, message="Select an option from the list:"):
     return pick("{:s} ".format(message))
 
 
-def validateRowCol(numTiles, rowsOrCols, isVirtual=True):
- #   print(numTiles)
- #   print(rowsOrCols)
-
+def validateRowCol(rows, cols, rowsOrCols, isVirtual=True):
+    numTiles = rows*cols
     try:
         rowsOrCols = int(rowsOrCols)
     except:
@@ -392,13 +390,36 @@ def validateRowCol(numTiles, rowsOrCols, isVirtual=True):
             print("There are only " + repr(numTiles) + " tiles!")
             return False
     return True
+
+def validateRow(rows, cols, row, isVirtual=True):
+    if not validateRowCol(rows, cols, row, isVirtual):
+        return False
+    row = int(row)
+    if row < 1 or row > rows:
+        print("Row must be between 1 and {:d}!".format(rows))
+        return False
+
+def validateCol(rows, cols, col, isVirtual=True):
+    if not validateRowCol(rows, cols, col, isVirtual):
+        return False
+    col = int(col)
+    if col < 1 or col > cols:
+        print("Column must be between 1 and {:d}!".format(cols))
+        return False
     
 
-def pickRowCol(cells, message, isVirtual=True):
+def pickRowCol(rows, cols, message, validationFunc=validateRowCol, isVirtual=True):
     x = input(message)
-    while validateRowCol(cells, x, isVirtual) is False:
+    while validationFunc(rows, cols, x, isVirtual) is False:
         x = input(message)
     return x
+
+def pickRow(*args, **kwargs):
+    return pickRowCol(*args, validationFunc=validateRow, **kwargs)
+
+def pickCol(*args, **kwargs):
+    return pickRowCol(*args, validationFunc=validateCol, **kwargs)
+    
 
 def YESno(message, default="Y"):
     yesses = ("yes", "Yes", "YES", "y", "Y")
@@ -445,27 +466,37 @@ def pickFile(message):
 
 def configWithKeyboard(floorConfig, tilepile):
     config = list()
+    mappedAddrs = list()
     print("Blanking all tiles.")
     for port in tilepile.lsMatrix:
         myTile = LSRealTile(tilepile.sharedSerials[port])
         myTile.assignAddress(0)
     #   myTile.blank()     # Not implemented in LSRealTile
         myTile.setColor(0)  # A TEMPORARY hack
+
         
     for port in tilepile.lsMatrix:
         for addr in tilepile.lsMatrix[port]:
-            print("Port is: " + repr(port) + " Address is: " + repr(addr))
-            myTile = LSRealTile(tilepile.sharedSerials[port])
-            myTile.assignAddress(addr)
-            myTile.demo(1)
-            row=int(pickRowCol(floorConfig.cells, "Which row?: "))
-            row = row-1
-            col=int(pickRowCol(floorConfig.cells, "Which col?: "))
-            col = col-1
-            thisTile = (row, col, port, addr, (127, 127))
-            print("Added this tile: " + str(thisTile))
-            config.append(thisTile)
-            myTile.setColor(0)
+            rcHash = 0
+            while rcHash not in mappedAddrs:
+                print("\nPort is: " + repr(port) + " Address is: " + repr(addr))
+                myTile = LSRealTile(tilepile.sharedSerials[port])
+                myTile.assignAddress(addr)
+                myTile.demo(1)
+                row=int(pickRow(floorConfig.rows, floorConfig.cols, "Which row?: "))
+                col=int(pickCol(floorConfig.rows, floorConfig.cols, "Which col?: "))
+                rcHash = int(str(row)+str(col))
+                if rcHash not in mappedAddrs:
+                    mappedAddrs.append(rcHash)
+                    thisTile = (row-1, col-1, port, addr, (127, 127))
+                    config.append(thisTile)
+                    print("Added this tile: {:s}".format(str(thisTile)))
+                else:
+                    print("Tile ({:d}, {:d}) has already been configured!".format(row, col))
+                    rcHash = 0
+                myTile.setColor(0)
+                print(mappedAddrs)
+        print("")
     floorConfig.config = config
     return floorConfig
 
@@ -497,9 +528,6 @@ def interactiveConfig (config = None):
         for port in tilepile.lsMatrix:
             totaltiles += len(tilepile.lsMatrix[port])
 
-#            if len(availPorts) > 0:  # default to the first port in the list
-#                defaultPort = availPorts[0]
-
         # It's the little details that count
         question = "Would you like this to be a virtual floor?"
         if totaltiles is 0:
@@ -515,10 +543,10 @@ def interactiveConfig (config = None):
     else:
         print("\nConfiguring real floor...")
 
-    rows = int(pickRowCol(totaltiles, "\nHow many rows do you want?: "))
+    rows = int(pickRow(totaltiles, totaltiles, "\nHow many rows do you want?: "))
     
     if isVirtual is True or totaltiles is 0:
-        cols = int(pickRowCol(totaltiles, "How many columns do you want?: ", isVirtual))
+        cols = int(pickRowCol(rows, totaltiles, "How many columns do you want?: ", isVirtual))
     else:
         cols = int(totaltiles/rows)
 
