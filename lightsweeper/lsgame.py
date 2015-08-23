@@ -8,7 +8,6 @@ import shelve
 import threading
 import time
 
-from _thread import start_new_thread
 from datetime import timedelta
 from collections import defaultdict
 from collections import OrderedDict
@@ -39,7 +38,9 @@ class LSGame():
         game._reader = reader
 
     def over (game, score=None):
-        start_new_thread(game._keepScore, (score,))
+        print("[Game Over]")
+        game._keepScore(score)
+        game.ended = True
 
     def _keepScore(game, score):
         name = "???"
@@ -51,18 +52,14 @@ class LSGame():
                 game.HighScoreWins()
                 scores = game.scoreKeeper.getScores()
             if game.scoreKeeper.isHighScore(score, scoreFill=10):
-                keyboard = EnterName(game.display, game.audio, game.rows, game.cols, game._reader)
-                keyboard.init()
-                game.heartbeat = keyboard.heartbeat
-                game.stepOn = keyboard.stepOn
-                game.stepOff = keyboard.stepOff
-                while not keyboard.output:
-                    pass
-                name = keyboard.output
+                kbThread = getInput(EnterName, game)
+                kbThread.start()
+                while not game.keyBuffer:
+                    game.heartbeat([])
+                    game.display.heartbeat()
+                name = game.keyBuffer
             game.__addScore__(score, name)
             game.scoreKeeper.showScores()
-        print("[Game Over]")
-        game.ended = True
 
     def HighScoreWins(game):
         game.scoreKeeper = LSScores(game.__class__.__name__, cartridgeReader=game._reader)
@@ -79,7 +76,23 @@ class LSGame():
     def LowTimeWins(game):
         game.scoreKeeper = LSScores(game.__class__.__name__, cartridgeReader=game._reader, reverseScores = True, timeScores = True)
         game.__addScore__ = game.scoreKeeper.addLowTime
-        
+
+class getInput(threading.Thread):
+    def __init__(self, keyboard, game):
+        self.game = game
+        self.game.keyBuffer = False
+        self.kb = keyboard(game.display, game.audio, game.rows, game.cols, game._reader)
+        self.kb.init()
+        threading.Thread.__init__(self, name="keyboard")
+
+    def run(self):
+        self.game.heartbeat = self.kb.heartbeat
+        self.game.stepOn = self.kb.stepOn
+        self.game.stepOff = self.kb.stepOff
+        while not self.kb.output:
+            pass
+        self.game.keyBuffer = self.kb.output
+
 class LSScreenSaver(LSGame):
     def __init__(game, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -445,7 +458,7 @@ class EnterName(LSGame):
             raise Exception("Board must be at least 3 x 3!")
         self.initials = ["A", "A", "A"]
         self.locks = [False, False, False]
-        self.offset = (self.rows/2, self.cols/2)
+        self.offset = (int(self.rows/2), int(self.cols/2))
 
         r = self.offset[0]
         c = self.offset[1]
