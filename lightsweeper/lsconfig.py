@@ -352,8 +352,9 @@ class LSFloorConfig:
 def userSelect(selectionList, message="Select an option from the list:"):
     def checkInput(selection):
         options = dict(enumerate(selectionList))
-        if selection in options.values():
-            return selection
+        for key, value in options.items():
+            if selection.lower() == value.lower():
+                return(options[key])
         try:
             selection = int(selection)
         except:
