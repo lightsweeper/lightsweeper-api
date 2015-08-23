@@ -8,9 +8,9 @@ import shelve
 import threading
 import time
 
-from datetime import timedelta
 from collections import defaultdict
 from collections import OrderedDict
+from datetime import timedelta
 
 from lightsweeper.lsdisplay import LSDisplay
 from lightsweeper.lsaudio import LSAudio
@@ -110,7 +110,7 @@ class LSGameEngine():
     initLock = threading.Event()
     SIMULATED_FLOOR = True
     CONSOLE = False
-    numPlays = 0
+    numPlays = numLoops = 0
     _warnings = []
 
     def __init__(self, GAME, floorConfig=None, loop=True, cartridgeReader=False):
@@ -137,6 +137,7 @@ class LSGameEngine():
         self.display = LSDisplay(conf=conf, eventCallback = self.handleTileStepEvent, initScreen=True)
         self.moves = []
         self.sensorMatrix = defaultdict(lambda: defaultdict(int))
+        self.currentGame = None
         self.newGame(self.GAME)
 
         #these are for bookkeeping
@@ -147,6 +148,9 @@ class LSGameEngine():
         self.initLock.set()
 
     def newGame(self, Game):
+
+        self.lastGame = self.currentGame
+
         try: # Game is a list of game classes, pick one at random
             GAME = random.choice(Game)
         except: # Game was specified
@@ -157,6 +161,7 @@ class LSGameEngine():
         self.game = GAME(self.display, self.audio, self.ROWS, self.COLUMNS, self.cartridgeReader)
         self.startGame = time.time()
         self.game.sensors = self.sensorMatrix
+        self.numLoops += 1
         if not isinstance(self.game, LSScreenSaver):
             self.numPlays += 1
         try:
@@ -166,6 +171,7 @@ class LSGameEngine():
             self._warnOnce("{:s} has no init() method.".format(self.currentGame))
         
     def beginLoop(self, plays = 0):
+        self.fpsLog = dict()
         while True:
             if plays is not 0 and self.numPlays <= plays:
                 self.enterFrame()
@@ -243,6 +249,22 @@ class LSGameEngine():
             self.pauseGame()
         spaces = " " * (52)
         fps = 1.0/renderTime
+        fpsEntry = int(fps) if fps < self.game.frameRate else int(self.game.frameRate)
+        if self.numLoops in self.fpsLog.keys():
+            self.fpsLog[self.numLoops].append(fpsEntry)
+        else:
+            if self.numLoops > 1:
+                data = self.fpsLog[self.numLoops-1]
+                avg = int(sum(data)/len(data))
+                mod = max(set(data), key=data.count)
+                mrg = int(min(data) + max(data)/2)
+             #   print(data) # Debugging
+                del(data)
+                print("\nStats for: {:s}".format(self.lastGame))
+                statsString="  FrameRate: (average: {:d}fps) (mode: {:d}fps) (midrange: {:d}fps)"
+                print(statsString.format(avg, mod, mrg))
+                print("")
+            self.fpsLog[self.numLoops] = [fpsEntry]
         if fps < self.game.frameRate or self.game.frameRate < 0:
             print("{1:s}{0:.4f} FPS".format(1.0/renderTime, spaces), end="\r")
             return(0)
