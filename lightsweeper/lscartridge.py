@@ -44,7 +44,8 @@ class LSRFID:
         self.loadHint = False
         self.scores = defaultdict(list)
 
-    def findReader (self):        
+    def findReader (self):     
+        print("Looking for cartridge reader...")   
         for port in self.availPorts():
             try:
                 s = self._pyserial.Serial(port,
@@ -52,7 +53,7 @@ class LSRFID:
                                           bytesize  = self._pyserial.EIGHTBITS,
                                           parity    = self._pyserial.PARITY_NONE,
                                           stopbits  = self._pyserial.STOPBITS_ONE,
-                                          timeout   = 4)
+                                          timeout   = 3) # Experimentally dictated
             except self._pyserial.SerialException as e:
                 s = False
             if s:
@@ -152,6 +153,7 @@ def getLine(pySerialObject):
     dataBuffer = str()
     while True:
         char = pySerialObject.read(1)
+        print(char.decode("ASCII")) #Debugging
         if char != b'\n':
             dataBuffer += char.decode("ASCII")
         else:
