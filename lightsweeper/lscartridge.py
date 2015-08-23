@@ -52,7 +52,7 @@ class LSRFID:
                                           bytesize  = self._pyserial.EIGHTBITS,
                                           parity    = self._pyserial.PARITY_NONE,
                                           stopbits  = self._pyserial.STOPBITS_ONE,
-                                          timeout   = None)
+                                          timeout   = 4)
             except self._pyserial.SerialException as e:
                 s = False
             if s:
