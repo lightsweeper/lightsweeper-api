@@ -34,8 +34,9 @@ class LSRFID:
         self._list_ports = list_ports
         self.serial = self.findReader()
         d = threading.Thread(name='cartParserd', target=self.cartParser)
-    #    d.setDaemon(True)
+        d.setDaemon(True)
         d.start()
+
 
     def resetState(self):
         self.gameRunning = False
@@ -128,6 +129,19 @@ class LSRFID:
                 print("Cartridge removed during response write!")
             elif response[0] == "READY":        # Cartridge reader reset
                 self.resetState()
+            elif response[0] == "DEADBEEF":
+            # Rather than trying to properly manage our serial resources
+            # across processes in a portable way let's just reset everything
+            # whenever anything goes wrong
+                self.serial.close()
+                self.serial.open()
+                self.resetState()
+            elif response[0] == "?":
+                # We sent garbage to the reader, let's just reset everything,
+                # slow down, and try again
+                self.serial.close()
+                self.serial.open()
+                self.resetState()
             else:
                 print("Response not recognized: " + " ".join(response))
 
@@ -153,9 +167,13 @@ def getLine(pySerialObject):
     dataBuffer = str()
     while True:
         char = pySerialObject.read(1)
-        print(char.decode("ASCII"), end=" ") #Debugging
+    #    print(char.decode("ASCII"), end=" ") #Debugging
         if char != b'\n':
-            dataBuffer += char.decode("ASCII")
+            try:
+                dataBuffer += char.decode("ASCII")
+            except UnicodeDecodeError as e:
+                print("MooOOoo!")
+                return ("DEADBEEF")          # A wild hack has appeared! (See line 132)
         else:
             return(dataBuffer[:-1])
 
