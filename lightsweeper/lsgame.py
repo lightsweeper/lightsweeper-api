@@ -114,6 +114,7 @@ class LSGameEngine():
     _warnings = []
 
     def __init__(self, GAME, floorConfig=None, loop=True, cartridgeReader=False):
+        self.audio = LSAudio(initSound=True)
         self.cartridgeReader = cartridgeReader
         self.loop = loop
         self.wait = time.sleep
@@ -127,14 +128,14 @@ class LSGameEngine():
         else:
             self.REAL_FLOOR = True
 
+        self.display = LSDisplay(conf=conf, eventCallback = self.handleTileStepEvent, initScreen=True)
+
         self.ROWS = conf.rows
         self.COLUMNS = conf.cols
         os.system('cls' if os.name == 'nt' else 'clear')
         print("Board size is {:d}x{:d}".format(self.ROWS, self.COLUMNS))
             
         self.GAME = GAME
-        self.audio = LSAudio(initSound=True)
-        self.display = LSDisplay(conf=conf, eventCallback = self.handleTileStepEvent, initScreen=True)
         self.moves = []
         self.sensorMatrix = defaultdict(lambda: defaultdict(int))
         self.currentGame = None

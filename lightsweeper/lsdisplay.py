@@ -140,20 +140,23 @@ class LSDisplay():
         #fill left side of middle with message1, right side with message2
         #TODO: ability to favor one message or the other, preferentially cutting off the less-favored one
 
-    def showHighScores(self, highScores, label=True):
-        self.setAll(Shapes.ZERO, Colors.BLACK)
-        if label:
-            self.setMessage(0,"HIGH", color=Colors.BLUE)
-            self.setMessage(1,"SCORES", color=Colors.GREEN)
-            row = 2
-        else:
-            row = 0
-        while row < self.rows and len(highScores) > 0:
-            score = highScores.pop(0)
-            self.setMessageSplit(row, score[0], score[1], middle=4)
-            # self.setMessage(row, score[0])
-            # self.setMessage(row + 1, score[1], color=Colors.YELLOW, start=self.cols - 3)
-            row += 1
+
+
+    # Deprecated
+#    def showHighScores(self, highScores, label=True):
+#        self.setAll(Shapes.ZERO, Colors.BLACK)
+#        if label:
+#            self.setMessage(0,"HIGH", color=Colors.BLUE)
+#            self.setMessage(1,"SCORES", color=Colors.GREEN)
+#            row = 2
+#        else:
+#            row = 0
+#        while row < self.rows and len(highScores) > 0:
+#            score = highScores.pop(0)
+#            self.setMessageSplit(row, score[0], score[1], middle=4)
+#            # self.setMessage(row, score[0])
+#            # self.setMessage(row + 1, score[1], color=Colors.YELLOW, start=self.cols - 3)
+#            row += 1
 
     def clear(self, row, col):
         self.floor.blank(row, col)
@@ -162,26 +165,27 @@ class LSDisplay():
         self.floor.clearAll()
         self.heartbeat()
 
-    def hasShapeChangesFor(self, row, col):
-        val = True
-        try:
-            self.shapes[(row, col)]
-        except:
-            val = False
-        return val
+    # Deprecated
+ #   def hasShapeChangesFor(self, row, col):
+ #       val = True
+ #       try:
+ #           self.shapes[(row, col)]
+ #       except:
+ #          val = False
+ #       return val
 
-    def hasColorChangesFor(self, row, col):
-        val = True
-        try:
-            self.colors[(row, col)]
-        except:
-            val = False
-        return val
-
-    def setFrame(self):
-        self.heartbeat()
-        self.colors = dict()
-        self.shapes = dict()
+ #   def hasColorChangesFor(self, row, col):
+ #       val = True
+ #       try:
+ #           self.colors[(row, col)]
+ #       except:
+ #           val = False
+ #       return val
+ #
+ #   def setFrame(self):
+ #       self.heartbeat()
+ #       self.colors = dict()
+ #       self.shapes = dict()
 
     def getShape(self, row, col):
         return self.shapes[(row, col)]
@@ -189,28 +193,29 @@ class LSDisplay():
     def getColor(self, row, col):
         return self.colors[(row, col)]
 
-    def allShapes(self, shape):
+    def getAllShapes(self, shape):
         for row in range(self.rows):
             for col in range(self.cols):
                 self.shapes[(row, col)] = shape
 
-    def allColors(self, color):
+    def getAllColors(self, color):
         for row in range(self.rows):
             for col in range(self.cols):
                 self.colors[(row, col)] = color
 
-    def add(self, row, col, shape, color):
-        pass
+    # ?
+  #  def add(self, row, col, shape, color):
+  #      pass
 
-    def addCustom(self, row, col, colors):
-        pass
+   # def addCustom(self, row, col, colors):
+   #     pass
 
-    def addAnimation(self, row, col, animation, loops):
-        pass
+   # def addAnimation(self, row, col, animation, loops):
+   #     pass
 
 
 def main():
-    print("Testing LSDisplay realfloor and emulatedfloor")
+    print("Testing LSDisplay with virtual floor")
     display = LSDisplay(3,8)
 
     for j in range(8):

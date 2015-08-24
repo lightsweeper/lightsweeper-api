@@ -421,16 +421,6 @@ class LSRealTile(LSTile):
         self.shape = rgb[0]|rgb[1]|rgb[2]
 
 
-#    def set(self, shape=0, color=0, transition=0):
-#     #   raise NotImplementedError()
-#        if (color != 0):
-#            self.setColor(color)
-#        if (shape != 0 ):
-#            self.setShape(shape)
-#        if(transition != 0):
-#            self.setTransition(transition)
-#        return
-
     # expecting a 7-tuple of Color constants
     def setSegmentsCustom(self, segments, setItNow = True):
         pass
