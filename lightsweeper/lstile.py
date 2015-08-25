@@ -677,9 +677,7 @@ class LSOpen:
             raise IOError("Could not import serial functions. Make sure pyserial is installed.")
         from serial.tools import list_ports
 
-       # self._pyserial = serial.Serial = threadSafeSerial
         self._pyserial = serial
-       # print(self._pyserial.Serial)
         self._list_ports = list_ports
 
         self.sharedSerials = dict()
@@ -792,22 +790,22 @@ class LSOpen:
 
         posPorts = enumerate(sorted(self.lsMatrix.keys()))
 
+        # TODO: Sanity check that portList consists of valid ports
+        if portList is not None:
+            posPorts = dict(enumerate(sorted(portList)))
+
         # you can tell when the sleep deprivation starts to kick in
         def checkinput(foo):
-            if foo in self.lsMatrix.keys():
+            if foo in posPorts.keys():
                 return foo
             try:
                 foo = int(foo)
             except:
                 return False
-            bar = dict(enumerate(sorted(self.lsMatrix.keys())))
+            bar = dict(enumerate(sorted(posPorts.keys())))
             if int(foo) in bar.keys():
                 return bar.get(int(foo))
             return False
-
-        # TODO: Sanity check that portList consists of valid ports
-        if portList is not None:
-            posPorts = enumerate(sorted(portList))
 
         # Prompts the user to select a valid serial port then returns it
         print("\nThe following serial ports are available:\n")
