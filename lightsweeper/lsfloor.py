@@ -74,7 +74,11 @@ class LSFloor():
         # self._events is a thread-safe queue of events that look like (row, col, touch-sensor-percent)
         # LSFloor instances put event tuples into the queue
         self._events = Queue()
-        eventHandler = self._handleEvents(0, "{:s}-io-root", self._events, self.tiles, eventCallback)
+        eventHandler = self._handleEvents(0,
+                                          "{:s}-io-root".format(self.__class__.__name__),
+                                          self._events,
+                                          self.tiles,
+                                          eventCallback)
         eventHandler.start()
 
         # Register an LSRealFloor instance if there are real tiles in the configuration
@@ -409,6 +413,18 @@ class LSRealFloor(LSFloor):
         self.realTiles = LSOpen()
         self.sharedSerials = dict()
         self._addTilesFromConf()
+        self._eventQueue = Queue()
+
+        portSieve = defaultdict(list)
+
+        for row in range(self.rows):
+            for col in range(self.cols):
+                tile = self.tiles[row][col]
+                portSieve[tile.serial.port].append(tile)
+
+        for port, tiles in portSieve.items():
+            portEvents = self._threadedEventPoll(port, tiles, self)
+            portEvents.start()
 
         # Save changes to self.config (namely the most recent calibrationMap)
         atexit.register(self._saveState)
@@ -470,30 +486,43 @@ class LSRealFloor(LSFloor):
 
 
     def pollEvents(self):
-        tiles = self.tileList
         while True:
-            for tile in tiles:
-                reading = tile.sensorStatus()
+            while not self._eventQueue.empty():
+                event = self._eventQueue.get()
+                yield(event)
 
-                cMap = self.calibrationMap[(tile.address,tile.port)]
-                # A higher reading is less weight on the pressure sensor
-                lowest = cMap[0]
-                highest = cMap[1]
-                if reading < lowest:
-                    lowest = reading
-                    cMap[0] = lowest
-                elif reading > highest:
-                    highest = reading
-                    cMap[1] = highest
-                self.calibrationMap[(tile.address,tile.port)] = cMap
+    class _threadedEventPoll(threading.Thread):
 
-                if reading is highest:
-                    yield((tile.row, tile.col, 0))
-                elif reading is lowest and lowest < 127:
-                    yield((tile.row, tile.col, 100))
-                else:
-                    pcntOut = (((reading-highest)*100)/(lowest-highest))
-                    yield((tile.row, tile.col, pcntOut))
+        def __init__(self, port, tiles, realFloor):
+            self.floor = realFloor
+            self.tiles = tiles
+            threading.Thread.__init__(self, name="{:s}-event-monitor".format(port))
+            print("Starting {:s}".format(self.name))
+
+        def run(self):
+            while True:
+                for tile in self.tiles:
+                    reading = tile.sensorStatus()
+
+                    cMap = self.floor.calibrationMap[(tile.address,tile.port)]
+                    # A higher reading is less weight on the pressure sensor
+                    lowest = cMap[0]
+                    highest = cMap[1]
+                    if reading < lowest:
+                        lowest = reading
+                        cMap[0] = lowest
+                    elif reading > highest:
+                        highest = reading
+                        cMap[1] = highest
+                    self.floor.calibrationMap[(tile.address,tile.port)] = cMap
+
+                    if reading is highest:
+                        self.floor._eventQueue.put((tile.row, tile.col, 0))
+                    elif reading is lowest and lowest < 127:
+                        self.floor._eventQueue.put((tile.row, tile.col, lowest))
+                    else:
+                        pcntOut = (((reading-highest)*100)/(lowest-highest))
+                        self.floor._eventQueue.put((tile.row, tile.col, pcntOut))
 
 
 class MetaFloor(LSFloor):

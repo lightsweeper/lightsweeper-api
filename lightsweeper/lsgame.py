@@ -22,6 +22,7 @@ from lightsweeper import Colors
 from lightsweeper import Shapes
 
 FPS = 30
+_SENSOR_THRESHOLD = 0
 
 class LSGame():
     def __init__(game, display, audio, rows, cols, reader):
@@ -36,6 +37,9 @@ class LSGame():
         game.frameRate = FPS
         game.display.clearAll()
         game._reader = reader
+
+    def heartbeat (*args, **kwargs):
+        pass
 
     def over (game, score=None):
         print("[Game Over]")
@@ -113,8 +117,7 @@ class LSGameEngine():
     numPlays = numLoops = 0
     _warnings = []
 
-    def __init__(self, GAME, floorConfig=None, loop=True, cartridgeReader=False):
-        self.audio = LSAudio(initSound=True)
+    def __init__(self, GAME, floorConfig=None, loop=True, cartridgeReader=False, init=True):
         self.cartridgeReader = cartridgeReader
         self.loop = loop
         self.wait = time.sleep
@@ -128,7 +131,8 @@ class LSGameEngine():
         else:
             self.REAL_FLOOR = True
 
-        self.display = LSDisplay(conf=conf, eventCallback = self.handleTileStepEvent, initScreen=True)
+        self.audio = LSAudio(initSound=init)
+        self.display = LSDisplay(conf=conf, eventCallback = self.handleTileStepEvent, initScreen=init)
 
         self.ROWS = conf.rows
         self.COLUMNS = conf.cols
@@ -208,9 +212,9 @@ class LSGameEngine():
             self.moves = [x for x in self.moves if x[0] is not row and x[1] is not col]
         else:
             if self.sensorMatrix[row][col] is 0:
-         #       if sensorPcnt > 20:                 # Only trigger > 20%, hack to guard against phantom sensors
-         #                                           # TODO: This but better
-                if sensorPcnt > 0:
+                if sensorPcnt > _SENSOR_THRESHOLD:# Only trigger > n%, hack to guard against phantom sensors
+                                            # TODO: This but better
+             #   if sensorPcnt > 0:
                     try:
                         self.game.stepOn(row, col)
                     except AttributeError as e:   # Game has no stepOn() method
@@ -255,16 +259,19 @@ class LSGameEngine():
             self.fpsLog[self.numLoops].append(fpsEntry)
         else:
             if self.numLoops > 1:
-                data = self.fpsLog[self.numLoops-1]
-                avg = int(sum(data)/len(data))
-                mod = max(set(data), key=data.count)
-                mrg = int(min(data) + max(data)/2)
-             #   print(data) # Debugging
-                del(data)
-                print("\nStats for: {:s}".format(self.lastGame))
-                statsString="  FrameRate: (average: {:d}fps) (mode: {:d}fps) (midrange: {:d}fps)"
-                print(statsString.format(avg, mod, mrg))
-                print("")
+                try:
+                    data = self.fpsLog[self.numLoops-1]
+                    avg = int(sum(data)/len(data))
+                    mod = max(set(data), key=data.count)
+                    mrg = int(min(data) + max(data)/2)
+                 #   print(data) # Debugging
+                    del(data)
+                    print("\nStats for: {:s}".format(self.lastGame))
+                    statsString="  FrameRate: (average: {:d}fps) (mode: {:d}fps) (midrange: {:d}fps)"
+                    print(statsString.format(avg, mod, mrg))
+                    print("")
+                except KeyError:
+                    pass
             self.fpsLog[self.numLoops] = [fpsEntry]
         if fps < self.game.frameRate or self.game.frameRate < 0:
             print("{1:s}{0:.4f} FPS".format(1.0/renderTime, spaces), end="\r")
