@@ -49,7 +49,7 @@ class LSRFID:
         print("Looking for cartridge reader...")   
         for port in self.availPorts():
             try:
-                s = self._pyserial.Serial('/dev/ttyACM0',
+                s = self._pyserial.Serial(port,
                                           9600,
                                           bytesize  = self._pyserial.EIGHTBITS,
                                           parity    = self._pyserial.PARITY_NONE,
