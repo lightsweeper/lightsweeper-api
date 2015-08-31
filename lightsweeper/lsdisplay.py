@@ -159,7 +159,10 @@ class LSDisplay():
 #            row += 1
 
     def clear(self, row, col):
-        self.floor.blank(row, col)
+        try:
+            self.floor.blank(row, col)
+        except AttributeError as e:     # Tile is out of bounds
+            pass                        # Just keep on rolling
 
     def clearAll(self):
         self.floor.clearAll()

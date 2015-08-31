@@ -10,6 +10,8 @@ from lightsweeper import Shapes
 
 ### Definition of the Lightsweeper low level API
 
+# Todo: Add exceptions for e.g. TileNotFound, etc
+
 class LSTile():
     def __init__(self, row=0, col=0):
         self.row = row
