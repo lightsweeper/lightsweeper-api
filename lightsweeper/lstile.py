@@ -790,28 +790,29 @@ class LSOpen:
             will limit the prompt to those ports.
         """
 
-        posPorts = enumerate(sorted(self.lsMatrix.keys()))
+        posPorts = dict(enumerate(sorted(self.lsMatrix.keys())))
 
         # TODO: Sanity check that portList consists of valid ports
         if portList is not None:
             posPorts = dict(enumerate(sorted(portList)))
 
-        # you can tell when the sleep deprivation starts to kick in
-        def checkinput(foo):
-            if foo in posPorts.keys():
-                return foo
+        def checkinput(userSelection):
+            if userSelection in posPorts.values():
+                return userSelection
             try:
-                foo = int(foo)
-            except:
-                return False
-            bar = dict(enumerate(sorted(posPorts.keys())))
-            if int(foo) in bar.keys():
-                return bar.get(int(foo))
+                numericSelection = int(userSelection)
+            except ValueError as e:
+                if str(e).startswith("invalid literal for int() with base 10:"):
+                    return False
+                else:
+                    raise(e)
+            if numericSelection in posPorts.keys():
+                return posPorts.get(numericSelection)
             return False
 
         # Prompts the user to select a valid serial port then returns it
         print("\nThe following serial ports are available:\n")
-        for key,val in posPorts:
+        for key,val in posPorts.items():
             print("     [" + repr(key) + "]    " + repr(val) + "  (" + repr(len(self.lsMatrix.get(val))) + " attached tiles)")
         userPort = input("\nWhich one do you want? ")
         while checkinput(userPort) is False:
