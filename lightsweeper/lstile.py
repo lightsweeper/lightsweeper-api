@@ -519,7 +519,12 @@ class LSRealTile(LSTile):
     # TODO: Move this functionality to the "FLIP-ON" command in firmware
     def flip(self):
         tile_config = self.eepromRead(EE_CONFIG)
-        flip_config = ord(tile_config) ^ STATUS_FLIP_MASK
+        try:
+            flip_config = ord(tile_config) ^ STATUS_FLIP_MASK
+        except TypeError as e:
+            if str(e).startswith("ord() expected a character, but string of length"):
+                print("Cannot flip tile, try resetting the eeprom with tilediag")
+                return False
         self.eepromWrite(EE_CONFIG,flip_config)
         self.reset()
 
@@ -627,9 +632,9 @@ class LSRealTile(LSTile):
         addr = self.address + len(args) - 1  # command is not counted
         args.insert(0, addr)
         count = self.mySerial.safeWrite(args)
-        if self.Debug:
-            writeStr = (' '.join(format(x, '#02x') for x in args))
-            print("0x%x command wrote %d bytes: %s " % (args[1], count, writeStr))
+  #      if self.Debug:         # This debug clause breaks "Full test suite" in tilediag.py
+ #           writeStr = (' '.join(format(x, '#02x') for x in args))
+#            print("0x%x command wrote %d bytes: %s " % (args[1], count, writeStr))
 
         # if no response is expected, read anyway to flush tile debug output
         # do not slow down to flush if not in debug mode
