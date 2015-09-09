@@ -10,6 +10,11 @@ class NoCartReader(Exception):
     """ Custom exception returned when no cartridge readers are found. """
     pass
 
+class ReaderNotSupported(Exception):
+    """ Custom exception returned when the host system does not have the requisite
+        support for a physical cartridge reader. """
+    pass
+
 # Todo: exceptions
 # Todo: fix multiple instances
 
@@ -27,7 +32,7 @@ class LSRFID:
         try:
             import serial
         except ImportError as e:
-            raise IOError("Could not import serial functions: {:s}".format(e))
+            raise ReaderNotSupported("Could not import serial functions: {:s}".format(str(e)))
         from serial.tools import list_ports
 
         self._pyserial = serial
